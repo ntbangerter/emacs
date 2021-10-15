@@ -28,8 +28,8 @@
   (setq nano-color-salient    "#81A1C1") ;; Frost         / nord  9
   (setq nano-color-strong     "#ECEFF4") ;; Snow Storm 3  / nord  6
   ;; (setq nano-color-popout     "#D08770") ;; Aurora        / nord 12
-  ;; (setq nano-color-popout     "#EBCB8B") ;; Aurora        / nord 11
-  (setq nano-color-popout     "#677691")
+  (setq nano-color-popout     "#EBCB8B") ;; Aurora        / nord 11
+  ;; (setq nano-color-popout     "#677691")
   (setq nano-color-subtle     "#434C5E") ;; Polar Night 2 / nord  2
   (setq nano-color-faded      "#677691") ;;
   )
