@@ -1,0 +1,258 @@
+(require 'package)
+
+(add-to-list 'package-archives
+	     '("melpa" . "https://melpa.org/packages/") t)
+
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-and-compile
+  (setq use-package-always-ensure t
+        use-package-expand-minimally t))
+
+
+(use-package emacs
+  :init
+  (setq inhibit-startup-message t)
+  (setq ring-bell-function 'ignore)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (global-visual-line-mode 1)
+  ;; (global-display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (set-frame-font "Iosevka Fixed 13")
+  (setq initial-buffer-choice "~/")
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
+  (setq exec-path (append exec-path '("~/.local/bin/")))
+  
+  :bind
+  ("M-p" . beginning-of-defun)
+  ("M-n" . end-of-defun)
+  ("<backtab>" . indent-rigidly-left)
+  
+  :hook
+  (after-init . toggle-frame-fullscreen))
+
+
+;; close completions minibuffer on exit
+(add-hook 'minibuffer-exit-hook 
+      '(lambda ()
+         (let ((buffer "*Completions*"))
+           (and (get-buffer buffer)
+            (kill-buffer buffer)))))
+
+
+;; add spacing between windows
+(add-to-list 'default-frame-alist '(internal-border-width . 16))
+;; (set-fringe-mode 5)
+(setq-default right-fringe-width 0)
+(setq-default left-fringe-width 5)
+(setq window-divider-default-right-width 16)
+(setq window-divider-default-bottom-width 16)
+(setq window-divider-default-places t)
+(window-divider-mode)
+
+;; change how buffers with the same name are identified 
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
+
+;; (setq text-scale-mode-step 1.1)
+
+;; disable this on MacOS, throws an error otherwise
+(when (string= system-type "darwin")       
+  (setq dired-use-ls-dired nil))
+
+(setq-default fringes-outside-margins nil)
+(setq-default indicate-buffer-boundaries nil) ;; Otherwise shows a corner icon on the edge
+(setq-default indicate-empty-lines nil)       ;; Otherwise there are weird fringes on blank lines
+
+(set-face-attribute 'header-line t :inherit 'default)
+
+(column-number-mode t) ;; Show current column number in mode line
+
+;; custom mode line
+(setq-default mode-line-format
+  '("%e"
+	(:propertize " " display (raise +0.4)) ;; Top padding
+	(:propertize " " display (raise -0.4)) ;; Bottom padding
+
+	(:propertize "λ  " face font-lock-comment-face)
+	mode-line-modified
+	mode-line-frame-identification
+	mode-line-buffer-identification
+
+	;; Version control info
+	(:eval (when-let (vc vc-mode)
+			 ;; Use a pretty branch symbol in front of the branch name
+			 (list (propertize "   " 'face 'font-lock-comment-face)
+                   ;; Truncate branch name to 50 characters
+				   (propertize (truncate-string-to-width
+                                (substring vc 5) 50)
+							   'face 'font-lock-comment-face))))
+
+	;; Add space to align to the right
+	(:eval (propertize
+			 " " 'display
+			 `((space :align-to
+					  (-  (+ right right-fringe right-margin)
+						 ,(+ 3
+                             (string-width "%4l:3%c")))))))
+	
+	;; Line and column numbers
+	(:propertize "%4l:%c" face mode-line-buffer-id)))
+
+
+(use-package paren
+  :ensure nil
+  :init
+  (electric-pair-mode t)
+  (setq show-paren-delay 0)
+  
+  :config
+  (show-paren-mode +1))
+
+
+(use-package mwim
+  :ensure t
+  :bind 
+    ("C-a" . mwim-beginning-of-code-or-line)
+    ("C-e" . mwim-end-of-code-or-line))
+
+
+(use-package dired
+  :ensure nil
+  :bind
+  (:map dired-mode-map
+    ("RET" . dired-find-alternate-file)
+    ("^" . (lambda() (interactive) (find-alternate-file "..")))))
+
+
+(use-package eshell
+  :ensure nil
+  
+  :bind
+  ("C-c t" . eshell))
+
+
+(use-package ace-window)
+
+
+(use-package switch-window
+  :bind
+  (("C-x o" . switch-window)
+   ("C-x C-b" . buffer-menu)))
+
+
+(use-package modus-themes
+  :config
+  (load-theme 'modus-operandi t)
+  (set-face-attribute 'fringe nil :background nil)
+  (set-face-attribute 'line-number nil :slant 'italic :background nil)
+  (set-face-attribute 'window-divider nil :foreground "white")
+  (set-face-attribute 'window-divider-first-pixel nil :foreground "white")
+  (set-face-attribute 'window-divider-last-pixel nil :foreground "white")
+  (set-face-attribute 'mode-line nil :box nil)
+  (set-face-attribute 'mode-line-inactive nil :box nil)
+  )
+
+
+(use-package hungry-delete
+  :bind
+  (("C-c DEL" . hungry-delete-backward)))
+
+
+(use-package gptel
+  :init
+  (load "~/.emacs.d/secrets.el"))
+  (setq gptel-model "gpt-4.1-mini")
+
+
+(use-package magit
+  :config
+  (setq magit-display-buffer-function
+      (lambda (buffer)
+        (display-buffer
+         buffer (if (and (derived-mode-p 'magit-mode)
+                         (memq (with-current-buffer buffer major-mode)
+                               '(magit-process-mode
+                                 magit-revision-mode
+                                 magit-diff-mode
+                                 magit-stash-mode
+                                 magit-status-mode)))
+                    nil
+                  '(display-buffer-same-window))))))
+
+
+(use-package aider
+  :config
+  ;; For latest claude sonnet model
+  ;; (setq aider-args '("--model" "sonnet" "--no-auto-accept-architect"))
+  ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
+  ;; Or gemini model
+  ;; (setq aider-args '("--model" "gemini"))
+  ;; (setenv "GEMINI_API_KEY" <your-gemini-api-key>)
+  ;; Or chatgpt model
+  ;; (setq aider-args '("--model" "o4-mini"))
+  ;; (setenv "OPENAI_API_KEY" <your-openai-api-key>)
+  ;; Or use your personal config file
+  ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
+  ;; ;;
+  ;; Optional: Set a key binding for the transient menu
+  (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
+  ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
+  (aider-magit-setup-transients)) ;; add aider magit function to magit menu
+
+
+(use-package git-gutter
+  :hook (prog-mode . git-gutter-mode)
+  :config
+  (setq git-gutter:update-interval 0.02))
+
+
+(use-package git-gutter-fringe
+  :config
+  (define-fringe-bitmap 'git-gutter-fr:added [0] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [0] nil nil '(center repeated))
+  ;; (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [0] nil nil 'bottom))
+
+
+(use-package eglot
+  :hook
+  (go-mode . eglot-ensure))
+
+
+(use-package company
+  :hook
+  (after-init . global-company-mode))
+
+
+(use-package envrc
+  :hook (after-init . envrc-global-mode))
+
+(setq python-shell-completion-native-enable nil)
+
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c" default))
+ '(package-selected-packages
+   '(dired use-package vterm switch-window pyvenv pkg-info nord-theme multiple-cursors modus-themes material-theme julia-repl julia-mode jedi gptel go-mode flycheck elpher eglot dap-mode company better-defaults))
+ '(warning-suppress-types
+   '(((python python-shell-completion-native-turn-on-maybe))
+     ((python python-shell-completion-native-turn-on-maybe))
+     ((python python-shell-completion-native-turn-on-maybe)))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+(put 'dired-find-alternate-file 'disabled nil)
