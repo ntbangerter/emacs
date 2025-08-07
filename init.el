@@ -23,8 +23,9 @@
   (global-visual-line-mode 1)
   ;; (global-display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (set-frame-font "Iosevka Fixed 13")
-  (setq initial-buffer-choice "~/")
+  (set-frame-font "Iosevka Nerd Font")
+  (setq initial-scratch-message ";; How perfect is this\n;; How lucky are we\n\n")
+  (setq initial-buffer-choice t)
   (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
   (setq exec-path (append exec-path '("~/.local/bin/")))
   
@@ -49,7 +50,7 @@
 (add-to-list 'default-frame-alist '(internal-border-width . 16))
 ;; (set-fringe-mode 5)
 (setq-default right-fringe-width 0)
-(setq-default left-fringe-width 5)
+(setq-default left-fringe-width 10)
 (setq window-divider-default-right-width 16)
 (setq window-divider-default-bottom-width 16)
 (setq window-divider-default-places t)
@@ -146,11 +147,14 @@
    ("C-x C-b" . buffer-menu)))
 
 
+(use-package nerd-icons)
+
+
 (use-package modus-themes
   :config
   (load-theme 'modus-operandi t)
-  (set-face-attribute 'fringe nil :background nil)
-  (set-face-attribute 'line-number nil :slant 'italic :background nil)
+  (set-face-attribute 'fringe nil :background 'unspecified)
+  (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
   (set-face-attribute 'window-divider nil :foreground "white")
   (set-face-attribute 'window-divider-first-pixel nil :foreground "white")
   (set-face-attribute 'window-divider-last-pixel nil :foreground "white")
@@ -164,10 +168,10 @@
   (("C-c DEL" . hungry-delete-backward)))
 
 
-(use-package gptel
-  :init
-  (load "~/.emacs.d/secrets.el"))
-  (setq gptel-model "gpt-4.1-mini")
+;; (use-package gptel
+;;   :init
+;;   (load "~/.emacs.d/secrets.el"))
+;;   (setq gptel-model "gpt-4.1-mini")
 
 
 (use-package magit
@@ -221,19 +225,35 @@
 
 
 (use-package eglot
+  :ensure t
+  :config
+  (add-to-list 'eglot-server-programs '(
+    (python-mode python-ts-mode)
+    "uv" "run" "basedpyright-langserver" "--stdio"
+  ))
   :hook
-  (go-mode . eglot-ensure))
+  (go-mode . eglot-ensure)
+  (python-mode . eglot-ensure))
+
+
+(defun uv-python-shell-calculate-command ()
+  "Calculate the string used to execute the inferior Python process."
+  (format "%s %s"
+          ;; `python-shell-make-comint' expects to be able to
+          ;; `split-string-and-unquote' the result of this function.
+          "uv run python"
+          python-shell-interpreter-args))
+
+(advice-add 'python-shell-calculate-command :override #'uv-python-shell-calculate-command)
+
+(setq python-shell-dedicated 'project)
+(setq python-shell-prompt-detect-failure-warning nil)
+(setq python-shell-completion-native-enable nil)
 
 
 (use-package company
   :hook
   (after-init . global-company-mode))
-
-
-(use-package envrc
-  :hook (after-init . envrc-global-mode))
-
-(setq python-shell-completion-native-enable nil)
 
 
 (custom-set-variables
@@ -242,9 +262,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c" default))
- '(package-selected-packages
-   '(dired use-package vterm switch-window pyvenv pkg-info nord-theme multiple-cursors modus-themes material-theme julia-repl julia-mode jedi gptel go-mode flycheck elpher eglot dap-mode company better-defaults))
+   '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c"
+     default))
+ '(package-selected-packages nil)
  '(warning-suppress-types
    '(((python python-shell-completion-native-turn-on-maybe))
      ((python python-shell-completion-native-turn-on-maybe))
