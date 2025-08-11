@@ -77,8 +77,8 @@
 ;; custom mode line
 (setq-default mode-line-format
   '("%e"
-	(:propertize " " display (raise +0.4)) ;; Top padding
-	(:propertize " " display (raise -0.4)) ;; Bottom padding
+	(:propertize " " display (raise +0.2)) ;; Top padding
+	(:propertize " " display (raise -0.2)) ;; Bottom padding
 
 	(:propertize "λ  " face font-lock-comment-face)
 	mode-line-modified
@@ -150,14 +150,40 @@
 (use-package nerd-icons)
 
 
-(use-package modus-themes
+;; (use-package modus-themes
+;;   :config
+;;   (load-theme 'modus-operandi t)
+;;   (set-face-attribute 'fringe nil :background 'unspecified)
+;;   (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
+;;   (set-face-attribute 'window-divider nil :foreground "white")
+;;   (set-face-attribute 'window-divider-first-pixel nil :foreground "white")
+;;   (set-face-attribute 'window-divider-last-pixel nil :foreground "white")
+;;   (set-face-attribute 'mode-line nil :box nil)
+;;   (set-face-attribute 'mode-line-inactive nil :box nil)
+;;   )
+
+;; (use-package nord-theme
+;;   :ensure t
+;;   :config
+;;   (load-theme 'nord t)
+;;   (set-face-attribute 'fringe nil :background 'unspecified)
+;;   (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
+;;   (set-face-attribute 'window-divider nil :foreground "#2e3440")
+;;   (set-face-attribute 'window-divider-first-pixel nil :foreground "#2e3440")
+;;   (set-face-attribute 'window-divider-last-pixel nil :foreground "#2e3440")
+;;   (set-face-attribute 'mode-line nil :box nil)
+;;   (set-face-attribute 'mode-line-inactive nil :box nil)
+;;   )
+
+(use-package zenburn-theme
+  :ensure t
   :config
-  (load-theme 'modus-operandi t)
+  (load-theme 'zenburn t)
   (set-face-attribute 'fringe nil :background 'unspecified)
   (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
-  (set-face-attribute 'window-divider nil :foreground "white")
-  (set-face-attribute 'window-divider-first-pixel nil :foreground "white")
-  (set-face-attribute 'window-divider-last-pixel nil :foreground "white")
+  (set-face-attribute 'window-divider nil :foreground "#3f3f3f")
+  (set-face-attribute 'window-divider-first-pixel nil :foreground "#3f3f3f")
+  (set-face-attribute 'window-divider-last-pixel nil :foreground "#3f3f3f")
   (set-face-attribute 'mode-line nil :box nil)
   (set-face-attribute 'mode-line-inactive nil :box nil)
   )
