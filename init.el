@@ -21,10 +21,11 @@
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (global-visual-line-mode 1)
-  ;; (global-display-line-numbers-mode)
+  (global-display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   (set-frame-font "Iosevka Fixed 13")
-  (setq initial-buffer-choice "~/")
+  (setq initial-scratch-message ";; How perfect is this\n;; How lucky are we\n\n")
+  (setq initial-buffer-choice t)
   (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
   (setq exec-path (append exec-path '("~/.local/bin/")))
   
@@ -49,7 +50,7 @@
 (add-to-list 'default-frame-alist '(internal-border-width . 16))
 ;; (set-fringe-mode 5)
 (setq-default right-fringe-width 0)
-(setq-default left-fringe-width 5)
+(setq-default left-fringe-width 10)
 (setq window-divider-default-right-width 16)
 (setq window-divider-default-bottom-width 16)
 (setq window-divider-default-places t)
@@ -76,8 +77,8 @@
 ;; custom mode line
 (setq-default mode-line-format
   '("%e"
-	(:propertize " " display (raise +0.4)) ;; Top padding
-	(:propertize " " display (raise -0.4)) ;; Bottom padding
+	(:propertize " " display (raise +0.2)) ;; Top padding
+	(:propertize " " display (raise -0.2)) ;; Bottom padding
 
 	(:propertize "λ  " face font-lock-comment-face)
 	mode-line-modified
@@ -115,13 +116,6 @@
   (show-paren-mode +1))
 
 
-(use-package mwim
-  :ensure t
-  :bind 
-    ("C-a" . mwim-beginning-of-code-or-line)
-    ("C-e" . mwim-end-of-code-or-line))
-
-
 (use-package dired
   :ensure nil
   :bind
@@ -145,17 +139,43 @@
   (("C-x o" . switch-window)
    ("C-x C-b" . buffer-menu)))
 
+;; (use-package modus-themes
+;;   :config
+;;   (load-theme 'modus-operandi t)
+;;   (set-face-attribute 'fringe nil :background 'unspecified)
+;;   (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
+;;   (set-face-attribute 'window-divider nil :foreground "white")
+;;   (set-face-attribute 'window-divider-first-pixel nil :foreground "white")
+;;   (set-face-attribute 'window-divider-last-pixel nil :foreground "white")
+;;   (set-face-attribute 'mode-line nil :box nil)
+;;   (set-face-attribute 'mode-line-inactive nil :box nil)
+;;   )
 
-(use-package modus-themes
+;; (use-package nord-theme
+;;   :ensure t
+;;   :config
+;;   (load-theme 'nord t)
+;;   (set-face-attribute 'fringe nil :background 'unspecified)
+;;   (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
+;;   (set-face-attribute 'window-divider nil :foreground "#2e3440")
+;;   (set-face-attribute 'window-divider-first-pixel nil :foreground "#2e3440")
+;;   (set-face-attribute 'window-divider-last-pixel nil :foreground "#2e3440")
+;;   (set-face-attribute 'mode-line nil :box nil)
+;;   (set-face-attribute 'mode-line-inactive nil :box nil)
+;;   )
+
+(use-package zenburn-theme
+  :ensure t
   :config
-  (load-theme 'modus-operandi t)
-  (set-face-attribute 'fringe nil :background nil)
-  (set-face-attribute 'line-number nil :slant 'italic :background nil)
-  (set-face-attribute 'window-divider nil :foreground "white")
-  (set-face-attribute 'window-divider-first-pixel nil :foreground "white")
-  (set-face-attribute 'window-divider-last-pixel nil :foreground "white")
+  (load-theme 'zenburn t)
+  (set-face-attribute 'fringe nil :background 'unspecified)
+  (set-face-attribute 'line-number nil :slant 'italic :background 'unspecified)
+  (set-face-attribute 'window-divider nil :foreground "#3f3f3f")
+  (set-face-attribute 'window-divider-first-pixel nil :foreground "#3f3f3f")
+  (set-face-attribute 'window-divider-last-pixel nil :foreground "#3f3f3f")
   (set-face-attribute 'mode-line nil :box nil)
   (set-face-attribute 'mode-line-inactive nil :box nil)
+  ;; (set-face-attribute 'git-gutter-fr:modified nil :foreground "#E0CF9F")
   )
 
 
@@ -166,8 +186,12 @@
 
 (use-package gptel
   :init
-  (load "~/.emacs.d/secrets.el"))
-  (setq gptel-model "gpt-4.1-mini")
+  (load "~/.emacs.d/gptel-config.el")
+  :config
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+  :bind
+  (("C-c c" . gptel))
+  )
 
 
 (use-package magit
@@ -186,54 +210,82 @@
                   '(display-buffer-same-window))))))
 
 
-(use-package aider
-  :config
-  ;; For latest claude sonnet model
-  ;; (setq aider-args '("--model" "sonnet" "--no-auto-accept-architect"))
-  ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
-  ;; Or gemini model
-  ;; (setq aider-args '("--model" "gemini"))
-  ;; (setenv "GEMINI_API_KEY" <your-gemini-api-key>)
-  ;; Or chatgpt model
-  ;; (setq aider-args '("--model" "o4-mini"))
-  ;; (setenv "OPENAI_API_KEY" <your-openai-api-key>)
-  ;; Or use your personal config file
-  ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
-  ;; ;;
-  ;; Optional: Set a key binding for the transient menu
-  (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
-  ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
-  (aider-magit-setup-transients)) ;; add aider magit function to magit menu
+;; (use-package aider
+;;   :config
+;;   ;; For latest claude sonnet model
+;;   ;; (setq aider-args '("--model" "sonnet" "--no-auto-accept-architect"))
+;;   ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
+;;   ;; Or gemini model
+;;   ;; (setq aider-args '("--model" "gemini"))
+;;   ;; (setenv "GEMINI_API_KEY" <your-gemini-api-key>)
+;;   ;; Or chatgpt model
+;;   ;; (setq aider-args '("--model" "o4-mini"))
+;;   ;; (setenv "OPENAI_API_KEY" <your-openai-api-key>)
+;;   ;; Or use your personal config file
+;;   ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
+;;   ;; ;;
+;;   ;; Optional: Set a key binding for the transient menu
+;;   (global-set-key (kbd "C-c a") 'aider-transient-menu) ;; for wider screen
+;;   ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
+;;   (aider-magit-setup-transients)) ;; add aider magit function to magit menu
+
+
+(use-package aidermacs
+  :bind (("C-c a" . aidermacs-transient-menu))
+  ;; :config
+  ;; (load-file (expand-file-name "aider-config.el" user-emacs-directory))
+  )
 
 
 (use-package git-gutter
+  :ensure t
   :hook (prog-mode . git-gutter-mode)
   :config
   (setq git-gutter:update-interval 0.02))
 
 
 (use-package git-gutter-fringe
+  :ensure t
   :config
-  (define-fringe-bitmap 'git-gutter-fr:added [0] nil nil '(center repeated))
-  (define-fringe-bitmap 'git-gutter-fr:modified [0] nil nil '(center repeated))
-  ;; (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
-  (define-fringe-bitmap 'git-gutter-fr:deleted [0] nil nil 'bottom))
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  ;; (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom)
+  (set-face-foreground 'git-gutter-fr:modified "#D0BF8F")
+  ;; (define-fringe-bitmap 'git-gutter-fr:deleted [224] nil nil '(center repeated))
+  )
 
 
 (use-package eglot
+  :ensure t
+  :config
+  (add-to-list 'eglot-server-programs '(
+    (python-mode python-ts-mode)
+    "uv" "run" "basedpyright-langserver" "--stdio"
+  ))
   :hook
-  (go-mode . eglot-ensure))
+  (go-mode . eglot-ensure)
+  (python-mode . eglot-ensure))
+
+
+(defun uv-python-shell-calculate-command ()
+  "Calculate the string used to execute the inferior Python process."
+  (format "%s %s"
+          ;; `python-shell-make-comint' expects to be able to
+          ;; `split-string-and-unquote' the result of this function.
+          "uv run python"
+          python-shell-interpreter-args))
+
+(advice-add 'python-shell-calculate-command :override #'uv-python-shell-calculate-command)
+
+(setq python-shell-dedicated 'project)
+(setq python-shell-prompt-detect-failure-warning nil)
+(setq python-shell-completion-native-enable nil)
 
 
 (use-package company
   :hook
   (after-init . global-company-mode))
-
-
-(use-package envrc
-  :hook (after-init . envrc-global-mode))
-
-(setq python-shell-completion-native-enable nil)
 
 
 (custom-set-variables
@@ -243,8 +295,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c" default))
- '(package-selected-packages
-   '(dired use-package vterm switch-window pyvenv pkg-info nord-theme multiple-cursors modus-themes material-theme julia-repl julia-mode jedi gptel go-mode flycheck elpher eglot dap-mode company better-defaults))
+ '(package-selected-packages nil)
  '(warning-suppress-types
    '(((python python-shell-completion-native-turn-on-maybe))
      ((python python-shell-completion-native-turn-on-maybe))
