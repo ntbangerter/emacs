@@ -23,7 +23,8 @@
   (global-visual-line-mode 1)
   (global-display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (set-frame-font "Iosevka Fixed 13")
+  ;; (set-frame-font "Iosevka Fixed 13")
+  (set-frame-font "Iosevka Nerd Font")
   (setq initial-scratch-message ";; How perfect is this\n;; How lucky are we\n\n")
   (setq initial-buffer-choice t)
   (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
@@ -138,6 +139,10 @@
   :bind
   (("C-x o" . switch-window)
    ("C-x C-b" . buffer-menu)))
+
+
+(use-package nerd-icons)
+
 
 ;; (use-package modus-themes
 ;;   :config
