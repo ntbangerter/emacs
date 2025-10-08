@@ -192,8 +192,8 @@
 (use-package gptel
   :init
   (load "~/.emacs.d/gptel-config.el")
-  :config
-  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+  ;; :config
+  ;; (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
   :bind
   (("C-c c" . gptel))
   )
